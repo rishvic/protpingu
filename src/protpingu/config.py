@@ -36,8 +36,11 @@ class ConfigSchema(Schema):
         return Config(**data)
 
 
-def read_config(config_path: Path) -> Config:
-    schema = ConfigSchema()
-    with open(config_path, "rb") as f:
-        config_data = tomllib.load(f)
-    return schema.load(config_data)
+class ConfigReader:
+    def __init__(self):
+        self.config_schema = ConfigSchema()
+
+    def load_config(self, config_path: Path) -> Config:
+        with open(config_path, "rb") as f:
+            config_data = tomllib.load(f)
+        return self.config_schema.load(config_data)
