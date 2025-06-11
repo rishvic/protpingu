@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Optional
 
 import requests
 from marshmallow import Schema, fields, post_load
@@ -63,10 +64,13 @@ class StoreNotFoundError(ValueError):
 
 class Requestor:
     session: requests.Session
+    paginated_store_info_schema: PaginatedStoreInfoSchema
+    store_info: Optional[StoreInfo]
 
     def __init__(self, session: requests.Session):
         self.session = session
         self.paginated_store_info_schema = PaginatedStoreInfoSchema()
+        self.store_info = None
 
     def set_preference(self, pincode: str):
         response = self.session.get(
@@ -86,10 +90,10 @@ class Requestor:
         matching_store_records = [store_info for store_info in store_records.records if store_info.pincode == pincode]
         if len(matching_store_records) == 0:
             raise StoreNotFoundError(pincode)
-        store_info = matching_store_records[0]
+        self.store_info = matching_store_records[0]
 
         response = self.session.put(
             f"{_BASE_URL}/entity/ms.settings/_/setPreferences",
-            json={"data": {"store": store_info.substore}},
+            json={"data": {"store": self.store_info.substore}},
         )
         response.raise_for_status()

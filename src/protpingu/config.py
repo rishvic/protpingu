@@ -37,6 +37,8 @@ class ConfigSchema(Schema):
 
 
 class ConfigReader:
+    config_schema: ConfigSchema
+
     def __init__(self):
         self.config_schema = ConfigSchema()
 
