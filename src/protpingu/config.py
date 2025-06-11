@@ -1,0 +1,43 @@
+from dataclasses import dataclass, field
+from pathlib import Path
+import tomllib
+from typing import Optional
+
+from marshmallow import Schema, fields, post_load
+
+
+@dataclass
+class UserDetails:
+    name: str
+    pincode: str
+    email: Optional[str] = None
+
+
+@dataclass
+class Config:
+    users: list[UserDetails] = field(default_factory=list)
+
+
+class UserDetailsSchema(Schema):
+    name = fields.String(required=True)
+    pincode = fields.String(required=True)
+    email = fields.Email(required=False)
+
+    @post_load
+    def make_user_details(self, data, **kwargs):
+        return UserDetails(**data)
+
+
+class ConfigSchema(Schema):
+    users = fields.List(fields.Nested(UserDetailsSchema), required=False)
+
+    @post_load
+    def make_config(self, data, **kwargs):
+        return Config(**data)
+
+
+def read_config(config_path: Path) -> Config:
+    schema = ConfigSchema()
+    with open(config_path, "rb") as f:
+        config_data = tomllib.load(f)
+    return schema.load(config_data)
