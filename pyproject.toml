@@ -22,7 +22,7 @@ dependencies = [
 packages = [{ include = "protpingu", from = "src" }]
 
 [tool.poetry.scripts]
-check_products = "protpingu.scripts.check_products:app_run"
+check_products = "protpingu.cmd.check_products:app_run"
 
 
 [tool.poetry.group.dev.dependencies]
