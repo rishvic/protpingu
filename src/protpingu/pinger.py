@@ -108,12 +108,15 @@ class PaginatedStoreInfoSchema(Schema):
 
 
 class ProductMetaFieldsSchema(Schema):
-    uom = fields.String(required=True)
-    weight = fields.String(required=True)
-    ingredients = fields.String(required=True)
-    benefits = fields.String(required=True)
-    how_to_useit = fields.String(required=True)
-    product_type = fields.String(required=True)
+    uom = fields.String()
+    weight = fields.String()
+    ingredients = fields.String()
+    benefits = fields.String()
+    how_to_useit = fields.String()
+    product_type = fields.String()
+
+    class Meta:
+        unknown = EXCLUDE
 
     @post_load
     def make_product_meta_fields(self, data, **kwargs):
@@ -169,6 +172,10 @@ class ProductResponeSchema(Schema):
     data = fields.List(fields.Nested(ProductInfoSchema), required=True)
     paging = fields.Nested(ProductResponsePagingSchema, required=True)
 
+    @post_load
+    def make_product_response(self, data, **kwargs):
+        return ProductResponse(**data)
+
 
 class StoreNotFoundError(ValueError):
     def __init__(self, pincode, message="No store found for the given pincode"):
@@ -208,7 +215,11 @@ class Requestor:
         pincode_list = response.json()
         store_records = self.paginated_store_info_schema.load(pincode_list)
 
-        matching_store_records = [store_info for store_info in store_records.records if store_info.pincode == pincode]
+        matching_store_records = [
+            store_info
+            for store_info in store_records.records
+            if store_info.pincode == pincode
+        ]
         if len(matching_store_records) == 0:
             raise StoreNotFoundError(pincode)
         self.store_info = matching_store_records[0]
@@ -221,7 +232,7 @@ class Requestor:
 
         return copy.deepcopy(self.store_info)
 
-    def get_item_info(self, item_id: str):
+    def get_item_info(self, item_id: str) -> ProductInfo:
         if self.store_info is None:
             raise StoreNotSetError()
 
@@ -231,9 +242,10 @@ class Requestor:
                 "q": json.dumps({"alias": item_id}),
                 "limit": 1,
             },
-            headers={"Accept": "application/json; charset=utf-8"}
+            headers={"Accept": "application/json; charset=utf-8"},
         )
         response.raise_for_status()
         product_info = response.json()
 
-        return self.product_response_schema.load(product_info)
+        response_data = self.product_response_schema.load(product_info)
+        return response_data.data[0]

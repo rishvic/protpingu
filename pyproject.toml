@@ -3,18 +3,26 @@ name = "protpingu"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "Rishvic Pushpakaran",email = "rishvic@gmail.com"}
+    { name = "Rishvic Pushpakaran", email = "rishvic@gmail.com" }
 ]
-license = {text = "Apache-2.0"}
+license = { text = "Apache-2.0" }
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.13,<4.0"
 dependencies = [
     "requests (>=2.32.4,<3.0.0)",
     "marshmallow (>=4.0.0,<5.0.0)",
+    "jinja2 (>=3.1.6,<4.0.0)",
+    "html2text (>=2025.4.15,<2026.0.0)",
+    "absl-py (>=2.3.0,<3.0.0)",
+    "xdg-base-dirs (>=6.0.2,<7.0.0)",
+    "python-dotenv (>=1.1.0,<2.0.0)",
 ]
 
 [tool.poetry]
-packages = [{include = "protpingu", from = "src"}]
+packages = [{ include = "protpingu", from = "src" }]
+
+[tool.poetry.scripts]
+check_products = "protpingu.scripts.check_products:app_run"
 
 
 [tool.poetry.group.dev.dependencies]
